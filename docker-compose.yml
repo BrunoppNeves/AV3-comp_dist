@@ -1,0 +1,46 @@
+version: '3.8'
+services:
+  product_page:
+    image: python:3.8-slim
+    ports:
+      - '3000:3000'
+    depends_on:
+      - reviews-v1
+      - reviews-v2
+      - reviews-v3
+      - details
+
+  reviews-v1:
+    image: java:latest
+    environment:
+      - VERSION=v1
+
+  reviews-v2:
+    image: java:latest
+    environment:
+      - VERSION=v2
+
+  reviews-v3:
+    image: java:latest
+    environment:
+      - VERSION=v3
+
+  ratings:
+    image: node:latest
+    ports:
+      - '5000:5000'
+
+  details:
+    image: ruby:2.7
+    ports:
+      - '8081:8081'
+
+  locust:
+    image: locustio/locust
+    ports:
+      - '8089:8089'
+    volumes:
+      - ./locustfile.py:/mnt/locust/locustfile.py
+    command: '-f /mnt/locust/locustfile.py --host http://product_page'
+    depends_on:
+      - product_page
